@@ -1,0 +1,18 @@
+[package]
+name = "VisualEngine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Axum 核心（包含 WebSocket、异步、JSON 等核心能力）
+axum = { version = "0.7.0", features = ["ws", "macros", "json", "tokio"] }
+# Tokio 异步运行时（Axum 必须依赖，full 包含所有异步特性）
+tokio = { version = "1.0", features = ["full"] }
+# 日志（边缘引擎必备，替代 println）
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# JSON 序列化/反序列化
+serde = { version = "1.0", features = ["derive"] }
+# 可选：如果你需要 OpenCV/AI 推理（后续扩展）
+# opencv = { version = "0.82.0", features = ["opencv-4"] }
+# tch = { version = "0.15.0", features = ["cuda"] }
