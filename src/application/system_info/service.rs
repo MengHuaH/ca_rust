@@ -2,11 +2,15 @@ use serde::{Deserialize, Serialize};
 use std::process::Command;
 use tracing::info;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct SystemInfoResponse {
+    /// CPU标识符
     pub cpu_id: String,
+    /// 磁盘标识符
     pub disk_id: String,
+    /// 内存标识符
     pub memory_id: String,
+    /// 主板标识符
     pub motherboard_id: String,
 }
 

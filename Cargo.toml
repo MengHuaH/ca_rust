@@ -13,6 +13,9 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # JSON 序列化/反序列化
 serde = { version = "1.0", features = ["derive"] }
+# Swagger/OpenAPI 文档生成
+utoipa = { version = "4", features = ["axum_extras", "chrono"] }
+utoipa-swagger-ui = { version = "5", features = ["axum"] }
 # 可选：如果你需要 OpenCV/AI 推理（后续扩展）
 # opencv = { version = "0.82.0", features = ["opencv-4"] }
 # tch = { version = "0.15.0", features = ["cuda"] }

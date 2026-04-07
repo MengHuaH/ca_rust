@@ -8,7 +8,7 @@ mod application;
 mod domain;
 mod infrastructure;
 
-use api::create_api_routes;
+use api::{create_api_routes, create_swagger_routes};
 use infrastructure::config::AppConfig;
 
 #[tokio::main]
@@ -26,6 +26,7 @@ async fn main() {
 
     let app = Router::new()
         .nest("/api", create_api_routes())
+        .merge(create_swagger_routes())
         .route("/", get(|| async { "VisualEngine API Server" }));
 
     let listener =

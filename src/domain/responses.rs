@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct ApiResponse<T> {
     pub success: bool,
     pub code: u32,
@@ -9,7 +9,7 @@ pub struct ApiResponse<T> {
     pub timestamp: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct PaginatedResponse<T> {
     pub success: bool,
     pub code: u32,
@@ -18,13 +18,13 @@ pub struct PaginatedResponse<T> {
     pub timestamp: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct PaginatedData<T> {
     pub items: Vec<T>,
     pub pagination: PaginationInfo,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct PaginationInfo {
     pub page: u32,
     pub page_size: u32,
@@ -34,7 +34,7 @@ pub struct PaginationInfo {
     pub has_previous: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct PaginationRequest {
     pub page: Option<u32>,
     pub page_size: Option<u32>,
@@ -79,17 +79,15 @@ impl<T> ApiResponse<T> {
                 .as_secs(),
         }
     }
+    pub fn into_inner(self) -> ApiResponse<T> {
+        self
+    }
 }
 
 impl<T> PaginatedResponse<T> {
-    pub fn new(
-        items: Vec<T>,
-        page: u32,
-        page_size: u32,
-        total_items: u64,
-    ) -> Self {
+    pub fn new(items: Vec<T>, page: u32, page_size: u32, total_items: u64) -> Self {
         let total_pages = ((total_items as f64) / (page_size as f64)).ceil() as u32;
-        
+
         Self {
             success: true,
             code: 200,

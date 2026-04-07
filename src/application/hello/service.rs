@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
 pub struct HelloResponse {
+    /// 欢迎消息
     pub message: String,
 }
 
