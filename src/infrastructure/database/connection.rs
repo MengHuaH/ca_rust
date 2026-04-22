@@ -87,19 +87,22 @@ async fn create_database_if_not_exists(url: &str) -> Result<(), Box<dyn std::err
 /// 初始化数据库连接并执行迁移
 pub async fn init_database(config: &DatabaseConfig) -> Result<(), Box<dyn std::error::Error>> {
     info!("Initializing database connection...");
-    info!("Database URL: {}", &config.url);
+
+    // 构建数据库URL
+    let database_url = config.build_url();
+    info!("Database URL: {}", &database_url);
 
     // 首先尝试创建数据库（如果不存在）
     info!("Checking if database exists...");
 
-    if let Some(db_name) = extract_database_name(&config.url) {
+    if let Some(db_name) = extract_database_name(&database_url) {
         info!("Extracted database name: {}", db_name);
     }
 
-    create_database_if_not_exists(&config.url).await?;
+    create_database_if_not_exists(&database_url).await?;
 
     // 使用配置的连接池参数
-    let mut opt = ConnectOptions::new(&config.url);
+    let mut opt = ConnectOptions::new(&database_url);
 
     // 设置连接池参数
     opt.max_connections(config.max_connections)
@@ -111,13 +114,15 @@ pub async fn init_database(config: &DatabaseConfig) -> Result<(), Box<dyn std::e
 
     // 尝试连接到目标数据库（带重试机制）
     let mut retry_count = 0;
-    let max_retries = 5; // 增加重试次数
     let db = loop {
         match Database::connect(opt.clone()).await {
             Ok(db) => break db,
             Err(e) => {
-                if retry_count >= max_retries {
-                    warn!("Failed to connect after {} attempts: {}", max_retries, e);
+                if retry_count >= config.retry_max_attempts {
+                    warn!(
+                        "Failed to connect after {} attempts: {}",
+                        config.retry_max_attempts, e
+                    );
                     return Err(Box::new(e));
                 }
 
@@ -128,8 +133,9 @@ pub async fn init_database(config: &DatabaseConfig) -> Result<(), Box<dyn std::e
                 );
                 info!("Retrying connection after database creation...");
 
-                // 等待一段时间让数据库创建完成（每次等待时间递增）
-                let wait_time = 5 + retry_count * 5; // 增加等待时间
+                // 使用配置的重连参数计算等待时间
+                let wait_time =
+                    config.retry_base_delay + retry_count as u64 * config.retry_delay_multiplier;
                 info!("Waiting {} seconds for database to be ready...", wait_time);
                 tokio::time::sleep(Duration::from_secs(wait_time)).await;
 
@@ -194,7 +200,8 @@ pub fn get_db_connection() -> Arc<DatabaseConnection> {
 }
 
 pub async fn test_connection(config: &DatabaseConfig) -> Result<(), DbErr> {
-    let db = Database::connect(&config.url).await?;
+    let database_url = config.build_url();
+    let db = Database::connect(&database_url).await?;
 
     db.ping().await?;
 
