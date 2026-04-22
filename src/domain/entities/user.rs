@@ -1,18 +1,36 @@
 use bcrypt::{DEFAULT_COST, hash, verify};
+use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use crate::domain::entities::base_entity::{self, BaseEntity};
+use crate::domain::entities::base_entity::BaseEntity;
 
-// 使用宏创建 SeaORM 实体，自动包含基础字段，支持字段校验
-sea_orm_entity_with_base!(
-    User,
-    "users",
-    name: String => {length(min = 2, max = 50, message = "用户名长度必须在2-50个字符之间")},
-    phone: String => {regex(path = "PHONE_REGEX", message = "手机号格式不正确")},
-    email: Option<String> => {email(message = "邮箱格式不正确")},
-    password_hash: String => {length(min = 6, message = "密码长度至少6位")}
-);
+/// 用户实体 - 使用组合模式包含基础实体
+/// 通过组合 BaseEntity 来避免字段重复定义
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Validate)]
+#[sea_orm(table_name = "users")]
+pub struct Model {
+    #[serde(flatten)]
+    pub base: BaseEntity,
+
+    // 用户特有字段
+    #[validate(length(min = 2, max = 50, message = "用户名长度必须在2-50个字符之间"))]
+    pub name: String,
+
+    #[validate(regex(path = "PHONE_REGEX", message = "手机号格式不正确"))]
+    pub phone: String,
+
+    #[validate(email(message = "邮箱格式不正确"))]
+    pub email: Option<String>,
+
+    #[validate(length(min = 6, message = "密码长度至少6位"))]
+    pub password_hash: String,
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {}
+
+impl ActiveModelBehavior for ActiveModel {}
 
 impl Model {
     /// 创建一个新的用户
@@ -31,7 +49,7 @@ impl Model {
         email: Option<String>,
         password: String,
     ) -> Result<ActiveModel, Box<dyn std::error::Error>> {
-        // 创建基础实体
+        // 使用 BaseEntity 创建基础字段
         let base_entity = BaseEntity::new(created_by);
 
         // 验证密码长度
@@ -43,8 +61,8 @@ impl Model {
         let password_hash = hash(password, DEFAULT_COST)?;
 
         // 创建临时模型进行验证
-        let temp_model = Model::from_base_and_fields(
-            base_entity,
+        let temp_model = Self::from_base_and_fields(
+            &base_entity,
             name.clone(),
             phone.clone(),
             email.clone(),
@@ -56,15 +74,31 @@ impl Model {
             .validate()
             .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
 
-        // 使用宏提供的方法创建 ActiveModel
-        let model = Model::from_base_and_fields(
-            BaseEntity::new(created_by),
+        // 创建 ActiveModel
+        let mut active_model = ActiveModel::new();
+        active_model.name = Set(name);
+        active_model.phone = Set(phone);
+        active_model.email = Set(email);
+        active_model.password_hash = Set(password_hash);
+
+        Ok(active_model)
+    }
+
+    /// 从基础实体和字段创建模型
+    fn from_base_and_fields(
+        base: &BaseEntity,
+        name: String,
+        phone: String,
+        email: Option<String>,
+        password_hash: String,
+    ) -> Self {
+        Self {
+            base: base.clone(),
             name,
             phone,
             email,
             password_hash,
-        );
-        Ok(model.into())
+        }
     }
 
     /// 验证密码
@@ -92,15 +126,8 @@ impl Model {
         updated_by: String,
     ) -> Result<ActiveModel, validator::ValidationErrors> {
         // 创建临时模型进行验证
-        let temp_model = Model {
-            id: self.id.clone(),
-            created_at: self.created_at,
-            created_by: self.created_by.clone(),
-            updated_at: self.updated_at,
-            updated_by: self.updated_by.clone(),
-            is_deleted: self.is_deleted,
-            deleted_at: self.deleted_at,
-            deleted_by: self.deleted_by.clone(),
+        let temp_model = Self {
+            base: base.clone(),
             name: name.clone(),
             phone: phone.clone(),
             email: email.clone(),
@@ -111,11 +138,12 @@ impl Model {
 
         // 更新基础字段和用户特定字段
         let mut active_model: ActiveModel = self.clone().into();
-        active_model.name = sea_orm::Set(name);
-        active_model.phone = sea_orm::Set(phone);
-        active_model.email = sea_orm::Set(email);
-        active_model.updated_at = sea_orm::Set(Some(chrono::Utc::now()));
-        active_model.updated_by = sea_orm::Set(Some(updated_by));
+        active_model.name = Set(name);
+        active_model.phone = Set(phone);
+        active_model.email = Set(email);
+
+        // 更新基础实体
+        active_model.base = self.base.update(updated_by);
 
         Ok(active_model)
     }
@@ -139,9 +167,8 @@ impl Model {
         let password_hash = hash(new_password, DEFAULT_COST)?;
 
         let mut active_model: ActiveModel = self.clone().into();
-        active_model.password_hash = sea_orm::Set(password_hash);
-        active_model.updated_at = sea_orm::Set(Some(chrono::Utc::now()));
-        active_model.updated_by = sea_orm::Set(Some(updated_by));
+        active_model.password_hash = Set(password_hash);
+        active_model.base = self.base.update(updated_by);
 
         Ok(active_model)
     }
@@ -152,7 +179,34 @@ impl Model {
     ///
     /// * `deleted_by` - 删除用户的ID
     pub fn soft_delete(&self, deleted_by: String) -> ActiveModel {
-        self.soft_delete_base(deleted_by)
+        self.base.soft_delete(deleted_by).into()
+    }
+
+    /// 获取基础实体（组合模式的核心）
+    pub fn base_entity(&self) -> &BaseEntity {
+        &self.base
+    }
+
+    /// 使用基础实体更新用户
+    pub fn update_with_base(&mut self, base: BaseEntity) {
+        self.base = base;
+    }
+
+    /// 创建新的用户模型（使用基础实体）
+    pub fn new_with_base(
+        name: String,
+        phone: String,
+        email: Option<String>,
+        password_hash: String,
+        created_by: String,
+    ) -> Self {
+        Self {
+            base: BaseEntity::new(created_by),
+            name,
+            phone,
+            email,
+            password_hash,
+        }
     }
 }
 
