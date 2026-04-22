@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::env;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
@@ -40,6 +41,8 @@ pub struct DatabaseConfig {
 
 impl Default for AppConfig {
     fn default() -> Self {
+        let DATABASE_URL: String = env::var("DB_URL")
+            .unwrap_or("postgres://postgres:password@localhost:5432/db_default".to_string());
         Self {
             server: ServerConfig {
                 host: "localhost".to_string(),
@@ -56,8 +59,7 @@ impl Default for AppConfig {
                 max_image_size: 10 * 1024 * 1024, // 10MB
             },
             database: DatabaseConfig {
-                url: "postgres://postgres:password@localhost:5432/visualengineDB_default"
-                    .to_string(),
+                url: DATABASE_URL,
                 max_connections: 10,
                 min_connections: 2,
                 acquire_timeout: 30,
@@ -65,40 +67,5 @@ impl Default for AppConfig {
                 max_lifetime: 1800,
             },
         }
-    }
-}
-
-impl DatabaseConfig {
-    /// 从环境变量加载数据库配置
-    pub fn from_env() -> Result<Self, Box<dyn std::error::Error>> {
-        dotenvy::dotenv().ok();
-
-        let url = std::env::var("DB_URL").unwrap_or_else(|_| {
-            "postgres://postgres:password@localhost:5432/DB_default".to_string()
-        });
-
-        Ok(Self {
-            url,
-            max_connections: std::env::var("DB_MAX_CONNECTIONS")
-                .unwrap_or_else(|_| "10".to_string())
-                .parse()
-                .unwrap_or(10),
-            min_connections: std::env::var("DB_MIN_CONNECTIONS")
-                .unwrap_or_else(|_| "2".to_string())
-                .parse()
-                .unwrap_or(2),
-            acquire_timeout: std::env::var("DB_ACQUIRE_TIMEOUT")
-                .unwrap_or_else(|_| "30".to_string())
-                .parse()
-                .unwrap_or(30),
-            idle_timeout: std::env::var("DB_IDLE_TIMEOUT")
-                .unwrap_or_else(|_| "300".to_string())
-                .parse()
-                .unwrap_or(300),
-            max_lifetime: std::env::var("DB_MAX_LIFETIME")
-                .unwrap_or_else(|_| "1800".to_string())
-                .parse()
-                .unwrap_or(1800),
-        })
     }
 }
