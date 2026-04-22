@@ -56,7 +56,8 @@ impl Default for AppConfig {
                 max_image_size: 10 * 1024 * 1024, // 10MB
             },
             database: DatabaseConfig {
-                url: "postgres://postgres:password@localhost:5432/visualengine".to_string(),
+                url: "postgres://postgres:password@localhost:5432/visualengineDB_default"
+                    .to_string(),
                 max_connections: 10,
                 min_connections: 2,
                 acquire_timeout: 30,
@@ -73,7 +74,7 @@ impl DatabaseConfig {
         dotenvy::dotenv().ok();
 
         let url = std::env::var("DB_URL").unwrap_or_else(|_| {
-            "postgres://postgres:password@localhost:5432/visualengine".to_string()
+            "postgres://postgres:password@localhost:5432/DB_default".to_string()
         });
 
         Ok(Self {

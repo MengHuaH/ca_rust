@@ -1,5 +1,5 @@
 [package]
-name = "VisualEngine"
+name = "CA"
 version = "0.1.0"
 edition = "2024"
 
@@ -43,7 +43,9 @@ dotenvy = "0.15"
 # SeaORM 数据库 ORM
 sea-orm = { version = "1.1.20", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros"] }
 sea-orm-migration = "1.1.20"
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "chrono"] }
 
 # 异步 trait 支持
 async-trait = "0.1"
+
+# SHA2 哈希（用于迁移校验和）
+sha2 = "0.10"

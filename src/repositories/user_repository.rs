@@ -1,5 +1,9 @@
 use async_trait::async_trait;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
+use sea_orm::sea_query::Order;
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait,
+    QueryFilter, QueryOrder,
+};
 
 use crate::domain::entities::user::{ActiveModel, Column, Entity as UsersEntity, Model};
 
@@ -74,7 +78,7 @@ impl UserRepository for UserRepositoryImpl {
     async fn list(&self, page: u64, page_size: u64) -> Result<Vec<Model>, DbErr> {
         UsersEntity::find()
             .filter(Column::IsDeleted.eq(false))
-            .order_by_asc(Column::CreatedAt)
+            .order_by(Column::CreatedAt, Order::Asc)
             .paginate(&self.db, page_size)
             .fetch_page(page)
             .await
