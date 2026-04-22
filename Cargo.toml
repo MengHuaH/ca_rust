@@ -39,3 +39,11 @@ lazy_static = "1.4"
 
 # 配置管理
 dotenvy = "0.15"
+
+# SeaORM 数据库 ORM
+sea-orm = { version = "1.1.20", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros"] }
+sea-orm-migration = "1.1.20"
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "chrono"] }
+
+# 异步 trait 支持
+async-trait = "0.1"
