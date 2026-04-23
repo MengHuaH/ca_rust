@@ -4,6 +4,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::application::CreateUserCommand;
+use crate::application::DeleteUserCommand;
 use crate::application::UpdateUserCommand;
 
 use crate::domain::responses::ApiResponse;
@@ -30,10 +31,12 @@ use crate::domain::responses::ApiResponse;
     paths(
         crate::api::users::create::create_user,
         crate::api::users::update::update_user,
+        crate::api::users::delete::delete_user,
     ),
     components(
         schemas(CreateUserCommand, ApiResponse<String>),
         schemas(UpdateUserCommand, ApiResponse<String>),
+        schemas(DeleteUserCommand, ApiResponse<String>),
     ),
     servers(
         (description = "API服务器")
