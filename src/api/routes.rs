@@ -1,14 +1,7 @@
-use axum::{
-    Router,
-    routing::{get, post},
-};
+use axum::Router;
 
-use super::users::create_user;
-use crate::infrastructure::database::connection::get_db_connection;
+use super::users::routes::*;
 
 pub fn create_api_routes() -> Router {
-    let db = get_db_connection();
-    Router::new()
-        .route("/users/create", post(create_user))
-        .with_state((*db).clone())
+    Router::new().nest("/users", users_api_routes())
 }
