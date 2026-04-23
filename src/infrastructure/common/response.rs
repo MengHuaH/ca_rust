@@ -1,4 +1,5 @@
 use axum::{Json, http::StatusCode};
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
@@ -18,7 +19,7 @@ pub struct ApiResponse<T = ()> {
 }
 
 /// 详细的错误信息
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ApiError {
     /// 错误代码
     pub code: String,
@@ -152,6 +153,45 @@ impl ResponseBuilder {
     /// 创建禁止访问错误响应
     pub fn forbidden(message: &str) -> (StatusCode, Json<ApiResponse<()>>) {
         Self::error(StatusCode::FORBIDDEN, "FORBIDDEN", message, None, None)
+    }
+
+    /// 创建创建成功响应（带ID，常用于创建操作）
+    pub fn created<T: Serialize>(data: T, message: &str) -> (StatusCode, Json<ApiResponse<T>>) {
+        let response = ApiResponse {
+            success: true,
+            data: Some(data),
+            error: None,
+            message: message.to_string(),
+            timestamp: Utc::now().timestamp(),
+        };
+
+        (StatusCode::CREATED, Json(response))
+    }
+
+    /// 创建无内容成功响应（常用于删除、更新操作）
+    pub fn no_content() -> (StatusCode, Json<ApiResponse<()>>) {
+        let response = ApiResponse {
+            success: true,
+            data: None,
+            error: None,
+            message: "操作成功".to_string(),
+            timestamp: Utc::now().timestamp(),
+        };
+
+        (StatusCode::NO_CONTENT, Json(response))
+    }
+
+    /// 创建接受请求响应（常用于异步操作）
+    pub fn accepted(message: &str) -> (StatusCode, Json<ApiResponse<()>>) {
+        let response = ApiResponse {
+            success: true,
+            data: None,
+            error: None,
+            message: message.to_string(),
+            timestamp: Utc::now().timestamp(),
+        };
+
+        (StatusCode::ACCEPTED, Json(response))
     }
 }
 
