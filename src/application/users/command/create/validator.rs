@@ -3,6 +3,7 @@ use crate::domain::entities::user::{Column, Entity as UsersEntity};
 use crate::infrastructure::common::FieldError;
 use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
 use tracing::error;
+use validator::Validate;
 
 pub struct CreateUserValidator {
     db: DatabaseConnection,
@@ -29,7 +30,28 @@ impl CreateUserValidator {
     pub async fn validate(&self, command: &CreateUserCommand) -> Result<(), Vec<FieldError>> {
         let mut errors = Vec::new();
 
-        // 验证手机号唯一性
+        // 1. 首先进行DTO字段格式验证
+        if let Err(validation_errors) = command.validate() {
+            errors.extend(
+                validation_errors
+                    .field_errors()
+                    .into_iter()
+                    .flat_map(|(field, errors)| {
+                        errors.iter().map(|error| FieldError {
+                            field: field.to_string(),
+                            message: error
+                                .message
+                                .as_ref()
+                                .map(|s| s.to_string())
+                                .unwrap_or_default(),
+                            code: format!("VALIDATION_ERROR_{}", field.to_uppercase()),
+                        })
+                    })
+                    .collect::<Vec<_>>(),
+            );
+        }
+
+        // 2. 验证手机号唯一性
         if let Err(e) = self.validate_phone_unique(&command.phone).await {
             errors.push(FieldError {
                 field: "phone".to_string(),
@@ -38,7 +60,7 @@ impl CreateUserValidator {
             });
         }
 
-        // 验证邮箱唯一性（如果提供）
+        // 3. 验证邮箱唯一性（如果提供）
         if let Some(email) = &command.email {
             if let Err(e) = self.validate_email_unique(email).await {
                 errors.push(FieldError {
@@ -49,7 +71,7 @@ impl CreateUserValidator {
             }
         }
 
-        // 验证用户名唯一性
+        // 4. 验证用户名唯一性
         if let Err(e) = self.validate_name_unique(&command.name).await {
             errors.push(FieldError {
                 field: "name".to_string(),
