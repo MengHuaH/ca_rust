@@ -12,7 +12,7 @@ pub struct Model {
     pub id: String,
 
     pub created_at: chrono::DateTime<chrono::Utc>,
-    pub created_by: String,
+    pub created_by: Option<String>,
 
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
     pub updated_by: Option<String>,
@@ -62,7 +62,7 @@ impl Model {
         let temp_model = Model {
             id: Uuid::new_v4().to_string(),
             created_at: chrono::Utc::now(),
-            created_by: created_by.clone(),
+            created_by: Some(created_by.clone()),
             updated_at: None,
             updated_by: None,
             is_deleted: false,
@@ -82,7 +82,7 @@ impl Model {
         let mut active_model = ActiveModel::new();
         active_model.id = Set(Uuid::new_v4().to_string());
         active_model.created_at = Set(chrono::Utc::now());
-        active_model.created_by = Set(created_by);
+        active_model.created_by = Set(Some(created_by));
         active_model.updated_at = Set(None);
         active_model.updated_by = Set(None);
         active_model.is_deleted = Set(false);

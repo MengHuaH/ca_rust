@@ -17,9 +17,9 @@ impl UsersTableMigration {
                     email VARCHAR(100) UNIQUE,
                     password_hash VARCHAR(255) NOT NULL,
                     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
-                    created_by VARCHAR(36) NOT NULL,
-                    updated_by VARCHAR(36) NOT NULL,
+                    updated_at TIMESTAMP WITH TIME ZONE,
+                    created_by VARCHAR(36),
+                    updated_by VARCHAR(36),
                     is_deleted BOOLEAN NOT NULL DEFAULT false,
                     deleted_at TIMESTAMP WITH TIME ZONE,
                     deleted_by VARCHAR(36)
@@ -68,31 +68,37 @@ impl UsersTableMigration {
     }
 
     /// 创建用户表
-    pub async fn create_table<C: ConnectionTrait>(conn: &C) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn create_table<C: ConnectionTrait>(
+        conn: &C,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let backend = conn.get_database_backend();
         let sql = Self::create_table_sql(backend);
-        
+
         info!("创建用户表...");
         conn.execute(Statement::from_string(backend, sql)).await?;
         info!("用户表创建完成");
-        
+
         Ok(())
     }
 
     /// 删除用户表
-    pub async fn drop_table<C: ConnectionTrait>(conn: &C) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn drop_table<C: ConnectionTrait>(
+        conn: &C,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let backend = conn.get_database_backend();
         let sql = Self::drop_table_sql();
-        
+
         info!("删除用户表...");
         conn.execute(Statement::from_string(backend, sql)).await?;
         info!("用户表删除完成");
-        
+
         Ok(())
     }
 
     /// 重置用户表（删除后重新创建）
-    pub async fn reset_table<C: ConnectionTrait>(conn: &C) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn reset_table<C: ConnectionTrait>(
+        conn: &C,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         Self::drop_table(conn).await?;
         Self::create_table(conn).await?;
         Ok(())
