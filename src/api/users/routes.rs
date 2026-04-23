@@ -12,7 +12,7 @@ pub fn users_api_routes() -> Router {
     let db = get_db_connection();
     Router::new()
         .route("/create", post(create_user))
-        .route("/update", post(update_user))
+        .route("/update/:user_id", put(update_user))
         .route("/delete/:user_id", delete(delete_user))
         .with_state((*db).clone())
 }

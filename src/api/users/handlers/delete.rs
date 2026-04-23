@@ -1,5 +1,6 @@
 use crate::application::users::command::delete::validator::ValidationError;
 use crate::application::users::command::delete::{DeleteUserCommand, DeleteUserService};
+use crate::domain::responses::ApiResponse;
 use crate::infrastructure::common::{AuthUtils, ResponseBuilder};
 use axum::{Json, extract::State, http::HeaderMap};
 use tracing::{error, info};

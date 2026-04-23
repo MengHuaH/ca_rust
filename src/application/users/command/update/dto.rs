@@ -9,9 +9,6 @@ lazy_static::lazy_static! {
 /// 更新用户命令
 #[derive(Debug, Clone, Validate, IntoParams, ToSchema, Deserialize)]
 pub struct UpdateUserCommand {
-    /// 用户ID
-    pub user_id: String,
-
     /// 用户名（可选更新）
     #[validate(length(min = 2, max = 50, message = "用户名长度必须在2-50个字符之间"))]
     pub name: Option<String>,

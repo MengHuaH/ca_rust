@@ -31,7 +31,11 @@ impl UpdateUserValidator {
     }
 
     /// 完整的更新用户验证 - 收集所有错误
-    pub async fn validate(&self, command: &UpdateUserCommand) -> Result<(), ValidationError> {
+    pub async fn validate(
+        &self,
+        command: &UpdateUserCommand,
+        user_id: &str,
+    ) -> Result<(), ValidationError> {
         let mut errors = Vec::new();
 
         // 1. 首先进行DTO字段格式验证
@@ -56,13 +60,13 @@ impl UpdateUserValidator {
         }
 
         // 2. 验证用户是否存在
-        if let Err(e) = self.validate_user_exists(&command.user_id).await {
+        if let Err(e) = self.validate_user_exists(&user_id).await {
             return Err(ValidationError::UserNotFound(e.to_string()));
         }
 
         // 3. 验证手机号唯一性（如果提供）
         if let Some(phone) = &command.phone {
-            if let Err(e) = self.validate_phone_unique(&command.user_id, phone).await {
+            if let Err(e) = self.validate_phone_unique(&user_id, phone).await {
                 errors.push(FieldError {
                     field: "phone".to_string(),
                     message: e.to_string(),
@@ -73,7 +77,7 @@ impl UpdateUserValidator {
 
         // 4. 验证邮箱唯一性（如果提供）
         if let Some(email) = &command.email {
-            if let Err(e) = self.validate_email_unique(&command.user_id, email).await {
+            if let Err(e) = self.validate_email_unique(&user_id, email).await {
                 errors.push(FieldError {
                     field: "email".to_string(),
                     message: e.to_string(),
@@ -84,7 +88,7 @@ impl UpdateUserValidator {
 
         // 5. 验证用户名唯一性（如果提供）
         if let Some(name) = &command.name {
-            if let Err(e) = self.validate_name_unique(&command.user_id, name).await {
+            if let Err(e) = self.validate_name_unique(&user_id, name).await {
                 errors.push(FieldError {
                     field: "name".to_string(),
                     message: e.to_string(),

@@ -1,5 +1,6 @@
 use crate::application::users::command::update::validator::ValidationError;
 use crate::application::users::command::update::{UpdateUserCommand, UpdateUserService};
+use crate::domain::responses::ApiResponse;
 use crate::infrastructure::common::{AuthUtils, ResponseBuilder};
 use axum::{
     Json,
@@ -13,10 +14,13 @@ use utoipa::ToSchema;
 ///
 /// 更新用户信息，支持部分更新
 #[utoipa::path(
-    post,
-    path = "/api/users/update",
+    put,
+    path = "/api/users/update/{user_id}",
     tag = "users",
     request_body = UpdateUserCommand,
+    params(
+        ("user_id" = String, Path, description = "用户ID")
+    ),
     responses(
         (status = 200, description = "成功更新用户", body = ApiResponse<()>),
         (status = 400, description = "请求参数错误", body = ApiResponse<()>),
@@ -27,13 +31,14 @@ use utoipa::ToSchema;
 )]
 pub async fn update_user(
     State(db): State<sea_orm::DatabaseConnection>,
+    Path(user_id): Path<String>,
     headers: HeaderMap,
     Json(command): Json<UpdateUserCommand>,
 ) -> (
     axum::http::StatusCode,
     Json<crate::infrastructure::common::ApiResponse<()>>,
 ) {
-    info!("更新用户请求: ID={}, 数据={:?}", command.user_id, command);
+    info!("更新用户请求: ID={}, 数据={:?}", user_id, command);
 
     // 获取调用者信息
     let updated_by =
@@ -42,11 +47,8 @@ pub async fn update_user(
     // 创建服务实例
     let user_service = UpdateUserService::new(db);
 
-    // // 合并用户ID到命令中
-    // let update_command = UpdateUserCommand { user_id, ..command };
-
     // 执行更新操作
-    match user_service.execute(command, updated_by).await {
+    match user_service.execute(command, user_id, updated_by).await {
         Ok(user_id) => {
             info!("用户更新成功: ID={}", user_id);
             ResponseBuilder::success_message(&format!("用户更新成功，ID: {}", user_id))
