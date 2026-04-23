@@ -3,8 +3,9 @@ use tracing::info;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::users::handlers::create_user;
 use crate::application::CreateUserCommand;
+use crate::application::UpdateUserCommand;
+
 use crate::domain::responses::ApiResponse;
 
 #[derive(OpenApi)]
@@ -27,10 +28,12 @@ use crate::domain::responses::ApiResponse;
 
     ),
     paths(
-        crate::api::users::handlers::create_user,
+        crate::api::users::create::create_user,
+        crate::api::users::update::update_user,
     ),
     components(
         schemas(CreateUserCommand, ApiResponse<String>),
+        schemas(UpdateUserCommand, ApiResponse<String>),
     ),
     servers(
         (description = "API服务器")

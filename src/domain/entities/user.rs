@@ -96,24 +96,24 @@ impl Model {
     /// 更新用户信息
     pub fn update_info(
         &self,
-        name: String,
-        phone: String,
-        email: Option<String>,
         updated_by: String,
+        name: Option<String>,
+        phone: Option<String>,
+        email: Option<String>,
     ) -> Result<ActiveModel, validator::ValidationErrors> {
-        // 创建临时模型进行验证
+        // 使用提供的值或现有值创建临时模型进行验证
         let temp_model = Model {
             id: self.id.clone(),
             created_at: self.created_at,
             created_by: self.created_by.clone(),
-            updated_at: self.updated_at,
-            updated_by: self.updated_by.clone(),
+            updated_at: Some(chrono::Utc::now()),
+            updated_by: Some(updated_by.clone()),
             is_deleted: self.is_deleted,
-            deleted_at: self.deleted_at,
-            deleted_by: self.deleted_by.clone(),
-            name: name.clone(),
-            phone: phone.clone(),
-            email: email.clone(),
+            deleted_at: None,
+            deleted_by: None,
+            name: name.clone().unwrap_or_else(|| self.name.clone()),
+            phone: phone.clone().unwrap_or_else(|| self.phone.clone()),
+            email: email.clone().or_else(|| self.email.clone()),
             password_hash: self.password_hash.clone(),
         };
 
@@ -121,11 +121,21 @@ impl Model {
 
         // 更新字段
         let mut active_model: ActiveModel = self.clone().into();
-        active_model.name = Set(name);
-        active_model.phone = Set(phone);
-        active_model.email = Set(email);
-        active_model.updated_at = Set(Some(chrono::Utc::now()));
-        active_model.updated_by = Set(Some(updated_by));
+
+        // 只更新提供的字段
+        if let Some(name) = name {
+            active_model.name = sea_orm::Set(name);
+        }
+        if let Some(phone) = phone {
+            active_model.phone = sea_orm::Set(phone);
+        }
+        if let Some(email) = email {
+            active_model.email = sea_orm::Set(Some(email));
+        }
+
+        // 总是更新时间和更新者
+        active_model.updated_at = sea_orm::Set(Some(chrono::Utc::now()));
+        active_model.updated_by = sea_orm::Set(Some(updated_by));
 
         Ok(active_model)
     }
