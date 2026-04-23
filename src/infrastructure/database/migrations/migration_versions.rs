@@ -50,31 +50,37 @@ impl MigrationVersionsTable {
     }
 
     /// 创建迁移版本表
-    pub async fn create_table<C: ConnectionTrait>(conn: &C) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn create_table<C: ConnectionTrait>(
+        conn: &C,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let backend = conn.get_database_backend();
         let sql = Self::create_table_sql(backend);
-        
+
         info!("创建迁移版本表...");
         conn.execute(Statement::from_string(backend, sql)).await?;
         info!("迁移版本表创建完成");
-        
+
         Ok(())
     }
 
     /// 删除迁移版本表
-    pub async fn drop_table<C: ConnectionTrait>(conn: &C) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn drop_table<C: ConnectionTrait>(
+        conn: &C,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let backend = conn.get_database_backend();
         let sql = Self::drop_table_sql();
-        
+
         info!("删除迁移版本表...");
         conn.execute(Statement::from_string(backend, sql)).await?;
         info!("迁移版本表删除完成");
-        
+
         Ok(())
     }
 
     /// 检查迁移版本表是否存在
-    pub async fn table_exists<C: ConnectionTrait>(conn: &C) -> Result<bool, Box<dyn std::error::Error>> {
+    pub async fn table_exists<C: ConnectionTrait>(
+        conn: &C,
+    ) -> Result<bool, Box<dyn std::error::Error>> {
         let backend = conn.get_database_backend();
         let check_sql = match backend {
             DatabaseBackend::Postgres => {
@@ -88,8 +94,10 @@ impl MigrationVersionsTable {
             }
         };
 
-        let result = conn.execute(Statement::from_string(backend, check_sql)).await?;
-        
+        let result = conn
+            .execute(Statement::from_string(backend, check_sql))
+            .await?;
+
         match backend {
             DatabaseBackend::Postgres => {
                 // PostgreSQL 返回布尔值

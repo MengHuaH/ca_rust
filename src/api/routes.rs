@@ -3,10 +3,12 @@ use axum::{
     routing::{get, post},
 };
 
-use super::users::{get_user_by_id, list_users};
+use super::users::create_user;
+use crate::infrastructure::database::connection::get_db_connection;
 
 pub fn create_api_routes() -> Router {
+    let db = get_db_connection();
     Router::new()
-        .route("/users", get(list_users))
-        .route("/users/:id", get(get_user_by_id))
+        .route("/api/users/create", post(create_user))
+        .with_state((*db).clone())
 }

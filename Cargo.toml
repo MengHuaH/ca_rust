@@ -47,5 +47,8 @@ sea-orm-migration = "1.1.20"
 # 异步 trait 支持
 async-trait = "0.1"
 
+# 错误处理
+thiserror = "1.0"
+
 # SHA2 哈希（用于迁移校验和）
 sha2 = "0.10"

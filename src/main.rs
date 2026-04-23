@@ -7,7 +7,6 @@ mod api;
 mod application;
 mod domain;
 mod infrastructure;
-mod repositories;
 
 use api::{create_api_routes, create_swagger_routes};
 use infrastructure::config::AppConfig;

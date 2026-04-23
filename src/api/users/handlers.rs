@@ -1,105 +1,97 @@
-use axum::{Json, extract::Query};
+use axum::{Json, extract::State, http::HeaderMap};
 use serde::{Deserialize, Serialize};
-use tracing::info;
-use utoipa::IntoParams;
+use tracing::{error, info};
+use utoipa::ToSchema;
 
-use crate::application::{ResponseService, create_response_service};
-use crate::domain::PaginationRequest;
+use crate::application::users::command::create::{CreateUserCommand, CreateUserService};
+use crate::domain::entities::user::Model;
 
-#[derive(Debug, Serialize, Deserialize, utoipa::ToSchema)]
-pub struct User {
-    /// 用户ID
-    pub id: u32,
-    /// 用户名
-    pub name: String,
-    /// 用户邮箱
-    pub email: String,
-    /// 创建时间
-    pub created_at: String,
-}
-
-#[derive(Debug, Deserialize, utoipa::IntoParams, utoipa::ToSchema)]
-pub struct UserListQuery {
-    /// 页码，默认为1
-    pub page: Option<u32>,
-    /// 每页数量，默认为20，最大100
-    pub page_size: Option<u32>,
-}
-
-/// 获取用户列表
-///
-/// 分页获取用户列表，支持页码和每页数量参数
-#[utoipa::path(
-    get,
-    path = "/api/users",
-    tag = "users",
-    params(UserListQuery),
-    responses(
-        (status = 200, description = "成功获取用户列表", body = PaginatedResponse<User>),
-        (status = 400, description = "请求参数错误")
-    )
-)]
-pub async fn list_users(
-    Query(query): Query<UserListQuery>,
-) -> Json<crate::domain::PaginatedResponse<User>> {
-    info!(
-        "List users endpoint called with page: {:?}, page_size: {:?}",
-        query.page, query.page_size
-    );
-
-    let response_service = create_response_service();
-    let pagination_request =
-        response_service.create_pagination_request(query.page, query.page_size);
-
-    // 模拟数据 - 在实际应用中这里会从数据库获取
-    let total_items = 100;
-    let page = pagination_request.get_page();
-    let page_size = pagination_request.get_page_size();
-    let offset = pagination_request.get_offset();
-
-    let mut users = Vec::new();
-    for i in 0..page_size {
-        let user_id = offset + i as u64 + 1;
-        users.push(User {
-            id: user_id as u32,
-            name: format!("User {}", user_id),
-            email: format!("user{}@example.com", user_id),
-            created_at: "2024-01-01T00:00:00Z".to_string(),
-        });
+/// 从请求头中获取调用者信息
+fn get_caller_from_headers(headers: &HeaderMap) -> Option<String> {
+    // 从认证头获取用户信息（例如 JWT token 中的用户ID）
+    if let Some(auth_header) = headers.get("Authorization") {
+        if let Ok(auth_str) = auth_header.to_str() {
+            // 这里可以解析JWT token获取用户ID
+            // 暂时返回一个示例值
+            return Some("authenticated_user".to_string());
+        }
     }
 
-    response_service.paginated(users, pagination_request, total_items)
+    // 从其他头信息获取（例如 X-User-Id）
+    if let Some(user_id_header) = headers.get("X-User-Id") {
+        if let Ok(user_id) = user_id_header.to_str() {
+            return Some(user_id.to_string());
+        }
+    }
+
+    // 从User-Agent获取（如果是系统调用）
+    if let Some(user_agent) = headers.get("User-Agent") {
+        if let Ok(ua_str) = user_agent.to_str() {
+            if ua_str.contains("system") || ua_str.contains("internal") {
+                return Some("system".to_string());
+            }
+        }
+    }
+
+    None
 }
 
-/// 根据用户ID获取用户信息
+/// 创建用户请求
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct CreateUserRequest {
+    pub name: String,
+    pub phone: String,
+    pub email: Option<String>,
+    pub password: String,
+}
+
+/// 创建用户
 ///
-/// 通过用户ID获取特定用户的详细信息
+/// 创建新用户，需要提供用户名、手机号、密码等信息
 #[utoipa::path(
-    get,
-    path = "/api/users/{id}",
+    post,
+    path = "/api/users/create",
     tag = "users",
-    params(
-        ("id" = u32, Path, description = "用户ID")
-    ),
+    request_body = CreateUserCommand,
     responses(
-        (status = 200, description = "成功获取用户信息", body = ApiResponse<User>),
-        (status = 404, description = "用户不存在")
+        (status = 201, description = "成功创建用户", body = String),
+        (status = 400, description = "请求参数错误"),
+        (status = 409, description = "手机号或邮箱已存在"),
+        (status = 500, description = "服务器内部错误")
     )
 )]
-pub async fn get_user_by_id(
-    axum::extract::Path(user_id): axum::extract::Path<u32>,
-) -> Json<crate::domain::ApiResponse<User>> {
-    info!("Get user by id endpoint called: {}", user_id);
+pub async fn create_user(
+    State(db): State<sea_orm::DatabaseConnection>,
+    headers: HeaderMap,
+    Json(command): Json<CreateUserCommand>,
+) -> Result<Json<String>, axum::http::StatusCode> {
+    info!("创建用户请求: {:?}", command);
 
-    let response_service = create_response_service();
+    // 获取调用者信息（从请求头或其他认证信息）
+    let created_by = get_caller_from_headers(&headers).unwrap_or_else(|| "system".to_string());
 
-    // 模拟数据 - 在实际应用中这里会从数据库获取
-    let user = User {
-        id: user_id,
-        name: format!("User {}", user_id),
-        email: format!("user{}@example.com", user_id),
-        created_at: "2024-01-01T00:00:00Z".to_string(),
-    };
+    // 创建服务实例
+    let user_service = CreateUserService::new(db);
 
-    response_service.success(user)
+    // 执行创建操作
+    match user_service.execute(command, created_by).await {
+        Ok(user_id) => {
+            info!("用户创建成功: ID={}", user_id);
+            Ok(Json(user_id))
+        }
+        Err(e) => {
+            error!("用户创建失败: {}", e);
+
+            // 根据错误类型返回不同的状态码
+            if e.to_string().contains("已被注册") {
+                return Err(axum::http::StatusCode::CONFLICT);
+            }
+
+            if e.to_string().contains("验证失败") || e.to_string().contains("格式不正确") {
+                return Err(axum::http::StatusCode::BAD_REQUEST);
+            }
+
+            Err(axum::http::StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
 }

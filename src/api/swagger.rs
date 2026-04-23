@@ -2,8 +2,8 @@ use axum::Router;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::api::users::handlers::{User, UserListQuery};
-use crate::application::{hello::service::HelloResponse, system_info::service::SystemInfoResponse};
+use crate::api::users::handlers::create_user;
+use crate::application::CreateUserCommand;
 use crate::domain::responses::ApiResponse;
 
 #[derive(OpenApi)]
@@ -30,7 +30,7 @@ use crate::domain::responses::ApiResponse;
         crate::api::users::handlers::get_user_by_id,
     ),
     components(
-        schemas(User, UserListQuery, SystemInfoResponse)
+        schemas(CreateUserCommand, ApiResponse<String>),
     ),
     servers(
         (description = "API服务器")
