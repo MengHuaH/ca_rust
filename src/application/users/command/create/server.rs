@@ -26,14 +26,20 @@ impl CreateUserService {
         let validator = CreateUserValidator::new(self.db.clone());
         validator.validate(&command).await?;
 
-        // 2. 使用领域层方法创建用户实体
-        let user_id = Uuid::new_v4().to_string();
+        // 2. 在应用层进行异步密码哈希
+        let password_hash = crate::infrastructure::security::PasswordSecurity::hash_password_async(
+            command.password_hash,
+        )
+        .await
+        .map_err(|e| ValidationError::MultipleErrors(vec![e.to_string()]))?;
+
+        // 3. 使用领域层方法创建用户实体（传入已哈希的密码）
         let user_active_model = Model::new(
             created_by,
             command.name,
             command.phone,
             command.email,
-            command.password_hash,
+            password_hash, // 传入已哈希的密码
         )
         .map_err(|e| ValidationError::MultipleErrors(vec![e.to_string()]))?;
 

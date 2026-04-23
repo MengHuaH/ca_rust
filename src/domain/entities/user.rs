@@ -2,6 +2,8 @@ use bcrypt::{DEFAULT_COST, hash, verify};
 use sea_orm::Set;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
+use tracing::debug;
+use uuid::Uuid;
 use validator::Validate;
 
 /// 用户实体
@@ -40,24 +42,14 @@ pub enum Relation {}
 impl ActiveModelBehavior for ActiveModel {}
 
 impl Model {
-    /// 创建一个新的用户
+    /// 创建一个新的用户（接收已哈希的密码）
     pub fn new(
         created_by: String,
         name: String,
         phone: String,
         email: Option<String>,
-        password: String,
+        password_hash: String, // 已哈希的密码
     ) -> Result<ActiveModel, Box<dyn std::error::Error>> {
-        use uuid::Uuid;
-
-        // 验证密码长度
-        if password.len() < 6 {
-            return Err("密码长度至少6位".into());
-        }
-
-        // 哈希密码
-        let password_hash = hash(password, DEFAULT_COST)?;
-
         // 创建临时模型进行验证
         let temp_model = Model {
             id: Uuid::new_v4().to_string(),
