@@ -9,6 +9,6 @@ use crate::infrastructure::database::connection::get_db_connection;
 pub fn create_api_routes() -> Router {
     let db = get_db_connection();
     Router::new()
-        .route("/api/users/create", post(create_user))
+        .route("/users/create", post(create_user))
         .with_state((*db).clone())
 }

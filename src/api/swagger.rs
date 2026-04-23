@@ -1,4 +1,5 @@
 use axum::Router;
+use tracing::info;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -9,12 +10,12 @@ use crate::domain::responses::ApiResponse;
 #[derive(OpenApi)]
 #[openapi(
     info(
-        title = "VisualEngine API",
-        description = "VisualEngine 图像处理和分析API",
+        title = "CA API",
+        description = "CA 用户管理API",
         version = "0.1.0",
         contact(
-            name = "VisualEngine Team",
-            email = "team@visualengine.com"
+            name = "CA Team",
+            email = "team@ca.com"
         ),
         license(
             name = "MIT",
@@ -26,8 +27,7 @@ use crate::domain::responses::ApiResponse;
 
     ),
     paths(
-        crate::api::users::handlers::list_users,
-        crate::api::users::handlers::get_user_by_id,
+        crate::api::users::handlers::create_user,
     ),
     components(
         schemas(CreateUserCommand, ApiResponse<String>),
@@ -38,9 +38,24 @@ use crate::domain::responses::ApiResponse;
 )]
 pub struct ApiDoc;
 
+use std::env;
+
 pub fn create_swagger_routes() -> Router {
-    // 使用正确的路由格式
-    SwaggerUi::new("/swagger-ui")
-        .url("/api-docs/openapi.json", ApiDoc::openapi())
-        .into()
+    let server_url = env::var("SERVER_HOST").unwrap_or_else(|_| "localhost".to_string());
+    let server_port = env::var("SERVER_PORT").unwrap_or_else(|_| "3000".to_string());
+    let swagger_ui_route = env::var("SWAGGER_UI_URL").unwrap_or_else(|_| "/swagger-ui".to_string());
+    let swagger_ui_openapi_url =
+        env::var("SWAGGER_UI_OPENAPI_URL").unwrap_or_else(|_| "/api-docs/openapi.json".to_string());
+    let swagger_ui_router = SwaggerUi::new(swagger_ui_route.clone())
+        .url(swagger_ui_openapi_url.clone(), ApiDoc::openapi())
+        .into();
+    info!(
+        "swagger-ui路由: http://{}:{}{}",
+        server_url, server_port, swagger_ui_route
+    );
+    info!(
+        "swagger-ui-openapi-url: http://{}:{}{}",
+        server_url, server_port, swagger_ui_openapi_url
+    );
+    swagger_ui_router
 }

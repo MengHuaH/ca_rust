@@ -11,7 +11,7 @@ pub struct CreateUserCommand {
     #[validate(length(min = 2, max = 50, message = "用户名长度必须在2-50个字符之间"))]
     pub name: String,
 
-    #[validate(regex(path = "*PHONE_REGEX", message = "手机号格式不正确"))]
+    #[validate(regex(path = "PHONE_REGEX", message = "手机号格式不正确"))]
     pub phone: String,
 
     #[validate(email(message = "邮箱格式不正确"))]
