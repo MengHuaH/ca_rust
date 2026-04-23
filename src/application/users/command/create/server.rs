@@ -3,6 +3,7 @@ use crate::application::users::command::create::validatorCommand::{
     CreateUserValidator, ValidationError,
 };
 use crate::domain::entities::user::Model;
+use crate::infrastructure::common::PasswordSecurity;
 use sea_orm::{ActiveModelTrait, DatabaseConnection};
 use tracing::info;
 use uuid::Uuid;
@@ -27,11 +28,9 @@ impl CreateUserService {
         validator.validate(&command).await?;
 
         // 2. 在应用层进行异步密码哈希
-        let password_hash = crate::infrastructure::security::PasswordSecurity::hash_password_async(
-            command.password_hash,
-        )
-        .await
-        .map_err(|e| ValidationError::MultipleErrors(vec![e.to_string()]))?;
+        let password_hash = PasswordSecurity::hash_password_async(command.password_hash)
+            .await
+            .map_err(|e| ValidationError::MultipleErrors(vec![e.to_string()]))?;
 
         // 3. 使用领域层方法创建用户实体（传入已哈希的密码）
         let user_active_model = Model::new(

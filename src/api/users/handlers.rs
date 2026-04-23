@@ -5,45 +5,7 @@ use utoipa::ToSchema;
 
 use crate::application::users::command::create::{CreateUserCommand, CreateUserService};
 use crate::domain::entities::user::Model;
-
-/// 从请求头中获取调用者信息
-fn get_caller_from_headers(headers: &HeaderMap) -> Option<String> {
-    // 从认证头获取用户信息（例如 JWT token 中的用户ID）
-    if let Some(auth_header) = headers.get("Authorization") {
-        if let Ok(auth_str) = auth_header.to_str() {
-            // 这里可以解析JWT token获取用户ID
-            // 暂时返回一个示例值
-            return Some("authenticated_user".to_string());
-        }
-    }
-
-    // 从其他头信息获取（例如 X-User-Id）
-    if let Some(user_id_header) = headers.get("X-User-Id") {
-        if let Ok(user_id) = user_id_header.to_str() {
-            return Some(user_id.to_string());
-        }
-    }
-
-    // 从User-Agent获取（如果是系统调用）
-    if let Some(user_agent) = headers.get("User-Agent") {
-        if let Ok(ua_str) = user_agent.to_str() {
-            if ua_str.contains("system") || ua_str.contains("internal") {
-                return Some("system".to_string());
-            }
-        }
-    }
-
-    None
-}
-
-/// 创建用户请求
-#[derive(Debug, Deserialize, ToSchema)]
-pub struct CreateUserRequest {
-    pub name: String,
-    pub phone: String,
-    pub email: Option<String>,
-    pub password: String,
-}
+use crate::infrastructure::common::{AuthUtils, PasswordSecurity};
 
 /// 创建用户
 ///
@@ -68,11 +30,11 @@ pub async fn create_user(
     info!("创建用户请求: {:?}", command);
 
     // 获取调用者信息（从请求头或其他认证信息）
-    let created_by = get_caller_from_headers(&headers).unwrap_or_else(|| "system".to_string());
+    let created_by =
+        AuthUtils::get_caller_from_headers(&headers).unwrap_or_else(|| "system".to_string());
 
     // 创建服务实例
     let user_service = CreateUserService::new(db);
-
     // 执行创建操作
     match user_service.execute(command, created_by).await {
         Ok(user_id) => {
