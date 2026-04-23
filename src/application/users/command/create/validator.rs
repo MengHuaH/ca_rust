@@ -2,10 +2,7 @@ use crate::application::users::command::create::dto::CreateUserCommand;
 use crate::domain::entities::user::{Column, Entity as UsersEntity};
 use crate::infrastructure::common::FieldError;
 use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
-use std::collections::HashSet;
 use tracing::error;
-use utoipa::openapi::Array;
-use validator::Validate;
 
 pub struct CreateUserValidator {
     db: DatabaseConnection,

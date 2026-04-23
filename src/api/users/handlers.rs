@@ -1,4 +1,4 @@
-use crate::application::users::command::create::validatorCommand::ValidationError;
+use crate::application::users::command::create::validator::ValidationError;
 use crate::application::users::command::create::{CreateUserCommand, CreateUserService};
 use crate::infrastructure::common::{AuthUtils, ResponseBuilder};
 use axum::{Json, extract::State, http::HeaderMap};

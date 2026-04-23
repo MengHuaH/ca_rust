@@ -1,7 +1,7 @@
 pub mod dto;
 pub mod server;
-pub mod validatorCommand;
+pub mod validator;
 
 pub use dto::CreateUserCommand;
 pub use server::CreateUserService;
-pub use validatorCommand::{CreateUserValidator, ValidationError};
+pub use validator::{CreateUserValidator, ValidationError};

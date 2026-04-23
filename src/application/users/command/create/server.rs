@@ -1,7 +1,5 @@
 use crate::application::users::command::create::dto::CreateUserCommand;
-use crate::application::users::command::create::validatorCommand::{
-    CreateUserValidator, ValidationError,
-};
+use crate::application::users::command::create::validator::{CreateUserValidator, ValidationError};
 use crate::domain::entities::user::Model;
 use crate::infrastructure::common::FieldError;
 use crate::infrastructure::common::PasswordSecurity;
