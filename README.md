@@ -1,4 +1,4 @@
-# VisualEngine.RS
+# CA_Rust
 
 一个基于Rust和Axum框架构建的现代化Web API服务，采用领域驱动设计(DDD)架构。
 
