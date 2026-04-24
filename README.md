@@ -46,7 +46,7 @@ src/
 
 ```bash
 git clone <repository-url>
-cd VisualEngine.RS
+cd logs
 ```
 
 2. **配置环境变量**

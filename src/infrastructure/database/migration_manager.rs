@@ -72,15 +72,10 @@ impl MigrationManager {
         if !MigrationVersionsTable::table_exists(conn).await? {
             return Ok(vec![]);
         }
-        let backend = conn.get_database_backend();
-        let check_sql = "SELECT COUNT(*) as count FROM migration_versions";
-        let result = conn
-            .execute(Statement::from_string(backend, check_sql))
-            .await?;
 
-        let mut applied_migrations = Vec::new();
-
-        Ok(applied_migrations)
+        // 这里需要实现从数据库查询已应用迁移的逻辑
+        // 暂时返回空向量
+        Ok(vec![])
     }
 
     /// 获取待应用的迁移
