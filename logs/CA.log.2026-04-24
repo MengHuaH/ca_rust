@@ -54,3 +54,59 @@
 2026-04-24T02:37:30.125630Z  INFO main ThreadId(01) swagger-ui路由: http://localhost:3000/swagger-ui
 2026-04-24T02:37:30.125717Z  INFO main ThreadId(01) swagger-ui-openapi-url: http://localhost:3000/api-docs/openapi.json
 2026-04-24T02:37:30.126265Z  INFO main ThreadId(01) Server running at http://localhost:3000
+2026-04-24T02:50:04.086536Z  INFO main ThreadId(01) Initializing database connection...
+2026-04-24T02:50:04.086700Z  INFO main ThreadId(01) Database URL: postgres://postgres:password@localhost:5432/db_default
+2026-04-24T02:50:04.086789Z  INFO main ThreadId(01) Checking if database exists...
+2026-04-24T02:50:04.086889Z  INFO main ThreadId(01) Extracted database name: db_default
+2026-04-24T02:50:04.114907Z  INFO main ThreadId(01) summary="SELECT 1 FROM pg_database …" db.statement="\n\nSELECT 1 FROM pg_database WHERE datname = 'db_default'\n" rows_affected=1 rows_returned=1 elapsed=1.6535ms elapsed_secs=0.0016535
+2026-04-24T02:50:04.115065Z  INFO main ThreadId(01) Database 'db_default' already exists
+2026-04-24T02:50:04.158218Z  INFO main ThreadId(01) Database connection initialized successfully with pool settings: max_connections=10, min_connections=2
+2026-04-24T02:50:04.158340Z  INFO main ThreadId(01) Executing database migrations...
+2026-04-24T02:50:04.162520Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=3.382ms elapsed_secs=0.003382
+2026-04-24T02:50:04.164715Z  INFO main ThreadId(01) summary="SELECT id, version, migration_name, …" db.statement="\n\nSELECT id, version, migration_name, applied_at, checksum, description FROM migration_versions ORDER BY version ASC\n" rows_affected=2 rows_returned=2 elapsed=1.4191ms elapsed_secs=0.0014191
+2026-04-24T02:50:04.166251Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=615.2µs elapsed_secs=0.0006152
+2026-04-24T02:50:04.167475Z  INFO main ThreadId(01) summary="SELECT id, version, migration_name, …" db.statement="\n\nSELECT id, version, migration_name, applied_at, checksum, description FROM migration_versions ORDER BY version ASC\n" rows_affected=2 rows_returned=2 elapsed=498µs elapsed_secs=0.000498
+2026-04-24T02:50:04.167680Z  INFO main ThreadId(01) Migration status: total=2, applied=0, pending=2
+2026-04-24T02:50:04.167794Z  INFO main ThreadId(01) Starting migration...
+2026-04-24T02:50:04.169548Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=499.1µs elapsed_secs=0.0004991
+2026-04-24T02:50:04.170559Z  INFO main ThreadId(01) summary="SELECT id, version, migration_name, …" db.statement="\n\nSELECT id, version, migration_name, applied_at, checksum, description FROM migration_versions ORDER BY version ASC\n" rows_affected=2 rows_returned=2 elapsed=423.3µs elapsed_secs=0.0004233
+2026-04-24T02:50:04.171567Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=440.2µs elapsed_secs=0.0004402
+2026-04-24T02:50:04.171684Z  INFO main ThreadId(01) Applying migration: 001 - create_migration_versions_table
+2026-04-24T02:50:04.173810Z  INFO main ThreadId(01) relation "migration_versions" already exists, skipping
+2026-04-24T02:50:04.173988Z  INFO main ThreadId(01) summary="CREATE TABLE IF NOT …" db.statement="\n\n\n                CREATE TABLE IF NOT EXISTS migration_versions (\n                    id SERIAL PRIMARY KEY,\n                    version VARCHAR(50) NOT NULL UNIQUE,\n                    migration_name VARCHAR(100) NOT NULL,\n                    applied_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,\n                    checksum VARCHAR(64) NOT NULL,\n                    description TEXT\n                )\n" rows_affected=0 rows_returned=0 elapsed=1.5618ms elapsed_secs=0.0015618
+2026-04-24T02:50:04.176099Z  INFO main ThreadId(01) summary="INSERT INTO migration_versions (version, …" db.statement="\n\nINSERT INTO migration_versions (version, migration_name, checksum, description) VALUES ('001', 'create_migration_versions_table', 'facaf595fe4409622cce0728d7df5331e0cad07603721998e21245d385113b51', 'Create migration versions table')\n" rows_affected=0 rows_returned=0 elapsed=1.3673ms elapsed_secs=0.0013673
+2026-04-24T02:50:04.176251Z  INFO main ThreadId(01) Migration failed: Execution Error: error returned from database: duplicate key value violates unique constraint "migration_versions_version_key"
+2026-04-24T02:50:04.176348Z  INFO main ThreadId(01) Database initialization completed
+2026-04-24T02:50:04.176440Z  INFO main ThreadId(01) Database initialization completed successfully
+2026-04-24T02:50:04.176528Z  INFO main ThreadId(01) Starting CA server on localhost:3000
+2026-04-24T02:50:04.177649Z  INFO main ThreadId(01) swagger-ui路由: http://localhost:3000/swagger-ui
+2026-04-24T02:50:04.177757Z  INFO main ThreadId(01) swagger-ui-openapi-url: http://localhost:3000/api-docs/openapi.json
+2026-04-24T02:50:04.178265Z  INFO main ThreadId(01) Server running at http://localhost:3000
+2026-04-24T02:50:51.709674Z  INFO main ThreadId(01) Initializing database connection...
+2026-04-24T02:50:51.709817Z  INFO main ThreadId(01) Database URL: postgres://postgres:password@localhost:5432/db_default
+2026-04-24T02:50:51.709898Z  INFO main ThreadId(01) Checking if database exists...
+2026-04-24T02:50:51.710032Z  INFO main ThreadId(01) Extracted database name: db_default
+2026-04-24T02:50:51.736911Z  INFO main ThreadId(01) summary="SELECT 1 FROM pg_database …" db.statement="\n\nSELECT 1 FROM pg_database WHERE datname = 'db_default'\n" rows_affected=1 rows_returned=1 elapsed=1.2866ms elapsed_secs=0.0012866
+2026-04-24T02:50:51.737083Z  INFO main ThreadId(01) Database 'db_default' already exists
+2026-04-24T02:50:51.778751Z  INFO main ThreadId(01) Database connection initialized successfully with pool settings: max_connections=10, min_connections=2
+2026-04-24T02:50:51.778874Z  INFO main ThreadId(01) Executing database migrations...
+2026-04-24T02:50:51.781546Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=2.1833ms elapsed_secs=0.0021833
+2026-04-24T02:50:51.784367Z  INFO main ThreadId(01) summary="SELECT COUNT(*) as count …" db.statement="\n\nSELECT COUNT(*) as count FROM migration_versions\n" rows_affected=1 rows_returned=1 elapsed=2.2679ms elapsed_secs=0.0022679
+2026-04-24T02:50:51.785384Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=420.1µs elapsed_secs=0.0004201
+2026-04-24T02:50:51.786388Z  INFO main ThreadId(01) summary="SELECT COUNT(*) as count …" db.statement="\n\nSELECT COUNT(*) as count FROM migration_versions\n" rows_affected=1 rows_returned=1 elapsed=360.2µs elapsed_secs=0.0003602
+2026-04-24T02:50:51.786563Z  INFO main ThreadId(01) Migration status: total=2, applied=0, pending=2
+2026-04-24T02:50:51.786721Z  INFO main ThreadId(01) Starting migration...
+2026-04-24T02:50:51.787686Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=372.9µs elapsed_secs=0.0003729
+2026-04-24T02:50:51.788548Z  INFO main ThreadId(01) summary="SELECT COUNT(*) as count …" db.statement="\n\nSELECT COUNT(*) as count FROM migration_versions\n" rows_affected=1 rows_returned=1 elapsed=335µs elapsed_secs=0.000335
+2026-04-24T02:50:51.789365Z  INFO main ThreadId(01) summary="SELECT EXISTS (SELECT FROM …" db.statement="\n\nSELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'migration_versions')\n" rows_affected=1 rows_returned=1 elapsed=331µs elapsed_secs=0.000331
+2026-04-24T02:50:51.789488Z  INFO main ThreadId(01) Applying migration: 001 - create_migration_versions_table
+2026-04-24T02:50:51.790682Z  INFO main ThreadId(01) relation "migration_versions" already exists, skipping
+2026-04-24T02:50:51.790826Z  INFO main ThreadId(01) summary="CREATE TABLE IF NOT …" db.statement="\n\n\n                CREATE TABLE IF NOT EXISTS migration_versions (\n                    id SERIAL PRIMARY KEY,\n                    version VARCHAR(50) NOT NULL UNIQUE,\n                    migration_name VARCHAR(100) NOT NULL,\n                    applied_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,\n                    checksum VARCHAR(64) NOT NULL,\n                    description TEXT\n                )\n" rows_affected=0 rows_returned=0 elapsed=908.9µs elapsed_secs=0.0009089
+2026-04-24T02:50:51.793024Z  INFO main ThreadId(01) summary="INSERT INTO migration_versions (version, …" db.statement="\n\nINSERT INTO migration_versions (version, migration_name, checksum, description) VALUES ('001', 'create_migration_versions_table', 'facaf595fe4409622cce0728d7df5331e0cad07603721998e21245d385113b51', 'Create migration versions table')\n" rows_affected=0 rows_returned=0 elapsed=1.4239ms elapsed_secs=0.0014239
+2026-04-24T02:50:51.793163Z  INFO main ThreadId(01) Migration failed: Execution Error: error returned from database: duplicate key value violates unique constraint "migration_versions_version_key"
+2026-04-24T02:50:51.793310Z  INFO main ThreadId(01) Database initialization completed
+2026-04-24T02:50:51.793414Z  INFO main ThreadId(01) Database initialization completed successfully
+2026-04-24T02:50:51.793487Z  INFO main ThreadId(01) Starting CA server on localhost:3000
+2026-04-24T02:50:51.794435Z  INFO main ThreadId(01) swagger-ui路由: http://localhost:3000/swagger-ui
+2026-04-24T02:50:51.794518Z  INFO main ThreadId(01) swagger-ui-openapi-url: http://localhost:3000/api-docs/openapi.json
+2026-04-24T02:50:51.794963Z  INFO main ThreadId(01) Server running at http://localhost:3000
