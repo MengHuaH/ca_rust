@@ -1,7 +1,6 @@
 use crate::application::users::command::create::validator::ValidationError;
 use crate::application::users::command::create::{CreateUserCommand, CreateUserService};
-use crate::domain::responses::ApiResponse;
-use crate::infrastructure::common::{AuthUtils, ResponseBuilder};
+use crate::infrastructure::common::{ApiResponse, AuthUtils, ResponseBuilder};
 use axum::{Json, extract::State, http::HeaderMap};
 use tracing::{error, info};
 
@@ -14,10 +13,10 @@ use tracing::{error, info};
     tag = "users",
     request_body = CreateUserCommand,
     responses(
-        (status = 200, description = "成功创建用户", body = ApiResponse<String>),
-        (status = 400, description = "请求参数错误", body = ApiResponse<()>),
-        (status = 409, description = "手机号或邮箱已存在", body = ApiResponse<()>),
-        (status = 500, description = "服务器内部错误", body = ApiResponse<()>)
+        (status = 200, description = "成功创建用户", body = ApiResponseString),
+        (status = 400, description = "请求参数错误", body = ApiResponseString),
+        (status = 409, description = "手机号或邮箱已存在", body = ApiResponseString),
+        (status = 500, description = "服务器内部错误", body = ApiResponseString)
     )
 )]
 pub async fn create_user(

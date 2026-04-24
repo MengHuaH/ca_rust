@@ -1,6 +1,5 @@
 use crate::application::users::command::update::validator::ValidationError;
 use crate::application::users::command::update::{UpdateUserCommand, UpdateUserService};
-use crate::domain::responses::ApiResponse;
 use crate::infrastructure::common::{AuthUtils, ResponseBuilder};
 use axum::{
     Json,
@@ -22,11 +21,11 @@ use utoipa::ToSchema;
         ("user_id" = String, Path, description = "用户ID")
     ),
     responses(
-        (status = 200, description = "成功更新用户", body = ApiResponse<()>),
-        (status = 400, description = "请求参数错误", body = ApiResponse<()>),
-        (status = 404, description = "用户不存在", body = ApiResponse<()>),
-        (status = 409, description = "数据冲突", body = ApiResponse<()>),
-        (status = 500, description = "服务器内部错误", body = ApiResponse<()>)
+        (status = 200, description = "成功更新用户", body = ApiResponseString),
+        (status = 400, description = "请求参数错误", body = ApiResponseString),
+        (status = 404, description = "用户不存在", body = ApiResponseString),
+        (status = 409, description = "数据冲突", body = ApiResponseString),
+        (status = 500, description = "服务器内部错误", body = ApiResponseString)
     )
 )]
 pub async fn update_user(

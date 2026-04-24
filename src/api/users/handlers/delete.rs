@@ -1,6 +1,5 @@
 use crate::application::users::command::delete::validator::ValidationError;
 use crate::application::users::command::delete::{DeleteUserCommand, DeleteUserService};
-use crate::domain::responses::ApiResponse;
 use crate::infrastructure::common::{AuthUtils, ResponseBuilder};
 use axum::{Json, extract::State, http::HeaderMap};
 use tracing::{error, info};
@@ -16,10 +15,10 @@ use tracing::{error, info};
         ("user_id" = String, Path, description = "用户ID")
     ),
     responses(
-        (status = 200, description = "成功删除用户", body = ApiResponse<String>),
-        (status = 400, description = "请求参数错误", body = ApiResponse<()>),
-        (status = 404, description = "用户不存在", body = ApiResponse<()>),
-        (status = 500, description = "服务器内部错误", body = ApiResponse<()>)
+        (status = 200, description = "成功删除用户", body = ApiResponseString),
+        (status = 400, description = "请求参数错误", body = ApiResponseString),
+        (status = 404, description = "用户不存在", body = ApiResponseString),
+        (status = 500, description = "服务器内部错误", body = ApiResponseString)
     )
 )]
 pub async fn delete_user(

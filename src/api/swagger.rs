@@ -3,11 +3,11 @@ use tracing::info;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+use crate::api::swaggerApiResponseString::ApiResponseString;
+
 use crate::application::CreateUserCommand;
 use crate::application::DeleteUserCommand;
 use crate::application::UpdateUserCommand;
-
-use crate::domain::responses::ApiResponse;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -34,9 +34,8 @@ use crate::domain::responses::ApiResponse;
         crate::api::users::delete::delete_user,
     ),
     components(
-        schemas(CreateUserCommand, ApiResponse<String>),
-        schemas(UpdateUserCommand, ApiResponse<String>),
-        schemas(DeleteUserCommand, ApiResponse<String>),
+        schemas(ApiResponseString),
+        schemas(UpdateUserCommand, CreateUserCommand, DeleteUserCommand),
     ),
     servers(
         (description = "API服务器")
