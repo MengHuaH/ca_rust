@@ -13,6 +13,7 @@ tokio = { version = "1.0", features = ["full"] }
 # 日志（边缘引擎必备，替代 println）
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
 
 # JSON 序列化/反序列化
 serde = { version = "1.0", features = ["derive"] }

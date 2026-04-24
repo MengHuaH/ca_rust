@@ -24,6 +24,9 @@ pub struct ServerConfig {
 pub struct LoggingConfig {
     pub level: String,
     pub format: String,
+    pub rotation: String,
+    pub directory: String,
+    pub filename: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -73,6 +76,9 @@ impl Default for AppConfig {
             logging: LoggingConfig {
                 level: env::var("LOG_LEVEL").unwrap_or("info".to_string()),
                 format: env::var("LOG_FORMAT").unwrap_or("json".to_string()),
+                rotation: env::var("LOG_ROTATION").unwrap_or("daily".to_string()),
+                directory: env::var("LOG_DIRECTORY").unwrap_or("./logs".to_string()),
+                filename: env::var("LOG_FILENAME").unwrap_or("CA.log".to_string()),
             },
             database: DatabaseConfig {
                 host: env::var("DB_HOST").unwrap_or("localhost".to_string()),
