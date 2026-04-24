@@ -46,7 +46,7 @@ src/
 
 ```bash
 git clone <repository-url>
-cd logs
+cd ca_rust
 ```
 
 2. **配置环境变量**
