@@ -1,4 +1,4 @@
-# VisualEngine.RS
+# CA_Rust
 
 一个基于Rust和Axum框架构建的现代化Web API服务，采用领域驱动设计(DDD)架构。
 
@@ -46,7 +46,7 @@ src/
 
 ```bash
 git clone <repository-url>
-cd VisualEngine.RS
+cd ca_rust
 ```
 
 2. **配置环境变量**
@@ -134,26 +134,6 @@ curl -X POST "http://localhost:3000/api/users/create" \
 
 ## ⚙️ 配置说明
 
-### 环境变量
-
-```bash
-# 服务器配置
-SERVER_HOST=localhost
-SERVER_PORT=3000
-
-# 数据库配置
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=password
-DB_NAME=visualengine
-
-# 日志配置
-LOG_LEVEL=info
-LOG_FORMAT=json
-LOG_ROTATION=daily
-```
-
 ### 日志配置
 
 - **控制台输出**: 美化格式，便于开发调试
@@ -185,38 +165,6 @@ src/
 3. **实现API接口** (`api/`)
 4. **添加数据访问** (`infrastructure/database/`)
 
-### 运行测试
-
-```bash
-# 运行所有测试
-cargo test
-
-# 运行特定测试
-cargo test --test user_management
-```
-
-## 🔧 部署
-
-### Docker部署
-
-```dockerfile
-FROM rust:1.70 as builder
-WORKDIR /app
-COPY . .
-RUN cargo build --release
-
-FROM debian:bookworm-slim
-COPY --from=builder /app/target/release/visualengine /usr/local/bin/
-CMD ["visualengine"]
-```
-
-### 生产环境配置
-
-1. 设置生产环境变量
-2. 配置反向代理(Nginx)
-3. 设置日志收集
-4. 配置监控告警
-
 ## 📄 许可证
 
 本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
@@ -229,4 +177,4 @@ CMD ["visualengine"]
 
 ---
 
-**开发中** - 更多功能正在开发中，欢迎贡献代码！
+**开发中** - 更多功能正在开发中！
