@@ -29,13 +29,14 @@ impl UpdateUserService {
         validator.validate(&command, &user_id).await?;
 
         // 2. 获取现有用户数据
-        let existing_user = UsersEntity::find()
+        let existing_user: Option<Model> = UsersEntity::find()
             .filter(Column::Id.eq(&user_id))
             .filter(Column::IsDeleted.eq(false))
             .one(&self.db)
             .await
-            .map_err(ValidationError::DatabaseError)?
-            .ok_or_else(|| ValidationError::UserNotFound(user_id.clone()))?;
+            .map_err(ValidationError::DatabaseError)?;
+        let existing_user =
+            existing_user.ok_or_else(|| ValidationError::UserNotFound(user_id.clone()))?;
 
         // 3. 使用领域层方法创建用户实体（传入已哈希的密码）
         let user_active_model = existing_user

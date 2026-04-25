@@ -107,7 +107,7 @@ impl UpdateUserValidator {
 
     /// 验证用户是否存在
     async fn validate_user_exists(&self, user_id: &str) -> Result<(), DbErr> {
-        let existing_user = UsersEntity::find()
+        let existing_user: Option<crate::domain::entities::user::Model> = UsersEntity::find()
             .filter(Column::Id.eq(user_id))
             .filter(Column::IsDeleted.eq(false))
             .one(&self.db)
@@ -123,7 +123,7 @@ impl UpdateUserValidator {
 
     /// 验证用户名唯一性（排除当前用户）
     async fn validate_name_unique(&self, user_id: &str, name: &str) -> Result<(), DbErr> {
-        let existing_user = UsersEntity::find()
+        let existing_user: Option<crate::domain::entities::user::Model> = UsersEntity::find()
             .filter(Column::Name.eq(name))
             .filter(Column::Id.ne(user_id))
             .filter(Column::IsDeleted.eq(false))
@@ -140,7 +140,7 @@ impl UpdateUserValidator {
 
     /// 验证手机号唯一性（排除当前用户）
     async fn validate_phone_unique(&self, user_id: &str, phone: &str) -> Result<(), DbErr> {
-        let existing_user = UsersEntity::find()
+        let existing_user: Option<crate::domain::entities::user::Model> = UsersEntity::find()
             .filter(Column::Phone.eq(phone))
             .filter(Column::Id.ne(user_id))
             .filter(Column::IsDeleted.eq(false))
@@ -157,7 +157,7 @@ impl UpdateUserValidator {
 
     /// 验证邮箱唯一性（排除当前用户）
     async fn validate_email_unique(&self, user_id: &str, email: &str) -> Result<(), DbErr> {
-        let existing_user = UsersEntity::find()
+        let existing_user: Option<crate::domain::entities::user::Model> = UsersEntity::find()
             .filter(Column::Email.eq(email))
             .filter(Column::Id.ne(user_id))
             .filter(Column::IsDeleted.eq(false))

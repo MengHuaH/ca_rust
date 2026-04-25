@@ -22,13 +22,13 @@ async fn main() {
     // 根据配置初始化日志
     init_logging(&config.logging);
 
-    // 初始化数据库（基础设施层负责连接和迁移）
-    match infrastructure::database::connection::init_database(&config.database).await {
+    // 初始化数据库连接（不执行迁移）
+    match infrastructure::database::connection::init_database_no_migration(&config.database).await {
         Ok(_) => {
-            info!("Database initialization completed successfully");
+            info!("Database connection established successfully");
         }
         Err(e) => {
-            error!("Database initialization failed: {}", e);
+            error!("Database connection failed: {}", e);
             return;
         }
     }

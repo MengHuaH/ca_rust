@@ -3,6 +3,16 @@ name = "CA"
 version = "0.1.0"
 edition = "2021"
 
+default-run = "CA"
+
+[[bin]]
+name = "migrate"
+path = "src/bin/migrate.rs"
+
+[[bin]]
+name = "CA"
+path = "src/main.rs"
+
 [dependencies]
 # Axum 核心（包含 WebSocket、异步、JSON 等核心能力）
 axum = { version = "0.7.0", features = ["ws", "macros", "json", "tokio"] }

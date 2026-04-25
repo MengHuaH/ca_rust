@@ -24,12 +24,13 @@ impl DeleteUserService {
         validator.validate(&command).await?;
 
         // 2. 获取现有用户数据
-        let existing_user = UsersEntity::find()
+        let existing_user: Option<Model> = UsersEntity::find()
             .filter(Column::Id.eq(&command.user_id))
             .filter(Column::IsDeleted.eq(false))
             .one(&self.db)
             .await
-            .map_err(ValidationError::DatabaseError)?
+            .map_err(ValidationError::DatabaseError)?;
+        let existing_user = existing_user
             .ok_or_else(|| ValidationError::UserNotFound(command.user_id.clone()))?;
 
         // 3. 构建删除模型（软删除）

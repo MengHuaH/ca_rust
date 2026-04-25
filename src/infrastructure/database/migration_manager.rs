@@ -77,9 +77,22 @@ impl MigrationManager {
         let select_sql = "SELECT id, version, migration_name, applied_at, checksum, description FROM migration_versions ORDER BY version";
 
         // 使用 query_all 而不是 execute 来获取查询结果
-        let rows = conn
+        let rows = match conn
             .query_all(Statement::from_string(backend, select_sql))
-            .await?;
+            .await
+        {
+            Ok(rows) => rows,
+            Err(e) => {
+                // 如果查询失败（例如表突然不存在），返回空列表
+                if e.to_string().contains("migration_versions")
+                    && e.to_string().contains("does not exist")
+                {
+                    return Ok(vec![]);
+                } else {
+                    return Err(e.into());
+                }
+            }
+        };
 
         let mut applied_migrations = Vec::new();
         for row in rows {

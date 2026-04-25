@@ -66,7 +66,7 @@ impl DeleteUserValidator {
 
     /// 验证用户是否存在且未被删除
     async fn validate_user_exists_and_active(&self, user_id: &str) -> Result<(), DbErr> {
-        let existing_user = UsersEntity::find()
+        let existing_user: Option<crate::domain::entities::user::Model> = UsersEntity::find()
             .filter(Column::Id.eq(user_id))
             .filter(Column::IsDeleted.eq(false))
             .one(&self.db)
