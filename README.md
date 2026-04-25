@@ -59,7 +59,13 @@ cp .env.example .env
 3. **运行数据库迁移**
 
 ```bash
-cargo run --bin migrate -- up
+cargo run --bin migrate
+```
+
+or
+
+```bash
+$env:RUST_LOG="debug"; cargo run --bin migrate
 ```
 
 4. **启动服务**
