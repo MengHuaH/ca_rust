@@ -190,7 +190,22 @@ impl MigrationManager {
     ) -> Result<Vec<String>, Box<dyn std::error::Error>> {
         info!("开始回滚迁移...");
 
-        let applied_migrations = Self::get_applied_migrations(conn).await?;
+        // 获取已应用的迁移，如果表不存在则返回空列表
+        let applied_migrations = match Self::get_applied_migrations(conn).await {
+            Ok(migrations) => migrations,
+            Err(e) => {
+                // 如果迁移版本表不存在，返回空列表
+                if e.to_string().contains("migration_versions")
+                    && e.to_string().contains("does not exist")
+                {
+                    info!("迁移版本表不存在，没有可回滚的迁移");
+                    return Ok(vec![]);
+                } else {
+                    return Err(e);
+                }
+            }
+        };
+
         let mut rolled_back_versions = Vec::new();
 
         // 按版本号降序排列（最新的先回滚）
@@ -267,6 +282,12 @@ impl MigrationManager {
         conn: &C,
         version: &str,
     ) -> Result<(), Box<dyn std::error::Error>> {
+        // 检查迁移版本表是否存在
+        if !MigrationVersionsTable::table_exists(conn).await? {
+            info!("迁移版本表不存在，跳过删除迁移记录");
+            return Ok(());
+        }
+
         let backend = conn.get_database_backend();
         let sql = format!(
             "DELETE FROM migration_versions WHERE version = '{}'",
