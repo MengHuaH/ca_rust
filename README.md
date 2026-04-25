@@ -58,11 +58,39 @@ cp .env.example .env
 
 3. **运行数据库迁移**
 
+数据库迁移工具支持以下操作：
+
+**执行迁移（默认）**
+
 ```bash
 cargo run --bin migrate
+# 或
+cargo run --bin migrate -- --action migrate
 ```
 
-or
+**回滚迁移**
+
+```bash
+# 回滚到指定版本
+cargo run --bin migrate -- --action rollback --target 001
+
+# 回滚最后一个迁移
+cargo run --bin migrate -- --action rollback
+```
+
+**创建迁移模板**
+
+```bash
+cargo run --bin migrate -- --action create --name your_table_name
+```
+
+**查看帮助信息**
+
+```bash
+cargo run --bin migrate -- --help
+```
+
+**调试模式**
 
 ```bash
 $env:RUST_LOG="debug"; cargo run --bin migrate
