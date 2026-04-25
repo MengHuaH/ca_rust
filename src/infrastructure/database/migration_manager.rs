@@ -72,13 +72,38 @@ impl MigrationManager {
         if !MigrationVersionsTable::table_exists(conn).await? {
             return Ok(vec![]);
         }
+
         let backend = conn.get_database_backend();
-        let check_sql = "SELECT COUNT(*) as count FROM migration_versions";
-        let result = conn
-            .execute(Statement::from_string(backend, check_sql))
+        let select_sql = "SELECT id, version, migration_name, applied_at, checksum, description FROM migration_versions ORDER BY version";
+
+        // 使用 query_all 而不是 execute 来获取查询结果
+        let rows = conn
+            .query_all(Statement::from_string(backend, select_sql))
             .await?;
 
         let mut applied_migrations = Vec::new();
+        for row in rows {
+            applied_migrations.push(MigrationRecord {
+                id: row
+                    .try_get("", "id")
+                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?,
+                version: row
+                    .try_get("", "version")
+                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?,
+                migration_name: row
+                    .try_get("", "migration_name")
+                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?,
+                applied_at: row
+                    .try_get("", "applied_at")
+                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?,
+                checksum: row
+                    .try_get("", "checksum")
+                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?,
+                description: row
+                    .try_get("", "description")
+                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?,
+            });
+        }
 
         Ok(applied_migrations)
     }
