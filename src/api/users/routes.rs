@@ -1,8 +1,9 @@
 use axum::{
-    Router,
     routing::{delete, get, patch, post, put},
+    Router,
 };
 
+use super::change_password::change_password;
 use super::create::create_user;
 use super::delete::delete_user;
 use super::update::update_user;
@@ -14,5 +15,6 @@ pub fn users_api_routes() -> Router {
         .route("/create", post(create_user))
         .route("/update/:user_id", put(update_user))
         .route("/delete/:user_id", delete(delete_user))
+        .route("/password/:user_id", put(change_password))
         .with_state((*db).clone())
 }

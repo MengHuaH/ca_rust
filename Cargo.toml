@@ -1,7 +1,7 @@
 [package]
 name = "CA"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 # Axum 核心（包含 WebSocket、异步、JSON 等核心能力）

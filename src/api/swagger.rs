@@ -5,6 +5,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api::swaggerApiResponseString::ApiResponseString;
 
+use crate::application::ChangePasswordCommand;
 use crate::application::CreateUserCommand;
 use crate::application::DeleteUserCommand;
 use crate::application::UpdateUserCommand;
@@ -32,10 +33,11 @@ use crate::application::UpdateUserCommand;
         crate::api::users::create::create_user,
         crate::api::users::update::update_user,
         crate::api::users::delete::delete_user,
+        crate::api::users::change_password::change_password,
     ),
     components(
         schemas(ApiResponseString),
-        schemas(UpdateUserCommand, CreateUserCommand, DeleteUserCommand),
+        schemas(UpdateUserCommand, CreateUserCommand, DeleteUserCommand, ChangePasswordCommand),
     ),
     servers(
         (description = "API服务器")

@@ -23,7 +23,7 @@ pub struct Model {
     pub deleted_at: Option<chrono::DateTime<chrono::Utc>>,
     pub deleted_by: Option<String>,
 
-    #[validate(length(min = 2, max = 50, message = "用户名长度必须在2-50个字符之间"))]
+    #[validate(length(min = 2, max = 50, message = "用户名长度必须在 2-50 个字符之间"))]
     pub name: String,
 
     #[validate(regex(path = "PHONE_REGEX", message = "手机号格式不正确"))]
@@ -32,7 +32,7 @@ pub struct Model {
     #[validate(email(message = "邮箱格式不正确"))]
     pub email: Option<String>,
 
-    #[validate(length(min = 6, message = "密码长度至少6位"))]
+    #[validate(length(min = 6, message = "密码长度至少 6 位"))]
     pub password_hash: String,
 }
 
@@ -48,9 +48,8 @@ impl Model {
         name: String,
         phone: String,
         email: Option<String>,
-        password_hash: String, // 已哈希的密码
+        password_hash: String,
     ) -> Result<ActiveModel, Box<dyn std::error::Error>> {
-        // 创建临时模型进行验证
         let temp_model = Model {
             id: Uuid::new_v4().to_string(),
             created_at: chrono::Utc::now(),
@@ -70,7 +69,6 @@ impl Model {
             .validate()
             .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
 
-        // 创建 ActiveModel
         let mut active_model = ActiveModel::new();
         active_model.id = Set(Uuid::new_v4().to_string());
         active_model.created_at = Set(chrono::Utc::now());
@@ -101,7 +99,6 @@ impl Model {
         phone: Option<String>,
         email: Option<String>,
     ) -> Result<ActiveModel, validator::ValidationErrors> {
-        // 使用提供的值或现有值创建临时模型进行验证
         let temp_model = Model {
             id: self.id.clone(),
             created_at: self.created_at,
@@ -119,10 +116,8 @@ impl Model {
 
         temp_model.validate()?;
 
-        // 更新字段
         let mut active_model: ActiveModel = self.clone().into();
 
-        // 只更新提供的字段
         if let Some(name) = name {
             active_model.name = sea_orm::Set(name);
         }
@@ -133,22 +128,52 @@ impl Model {
             active_model.email = sea_orm::Set(Some(email));
         }
 
-        // 总是更新时间和更新者
         active_model.updated_at = sea_orm::Set(Some(chrono::Utc::now()));
         active_model.updated_by = sea_orm::Set(Some(updated_by));
 
         Ok(active_model)
     }
 
-    /// 更新密码
+    /// 更新密码（不验证旧密码，用于管理员重置）
     pub fn update_password(
         &self,
         new_password: String,
         updated_by: String,
     ) -> Result<ActiveModel, Box<dyn std::error::Error>> {
-        // 验证密码长度
         if new_password.len() < 6 {
-            return Err("密码长度至少6位".into());
+            return Err("密码长度至少 6 位".into());
+        }
+
+        let password_hash = hash(new_password, DEFAULT_COST)?;
+
+        let mut active_model: ActiveModel = self.clone().into();
+        active_model.password_hash = Set(password_hash);
+        active_model.updated_at = Set(Some(chrono::Utc::now()));
+        active_model.updated_by = Set(Some(updated_by));
+
+        Ok(active_model)
+    }
+
+    /// 修改密码（需要验证旧密码，用于用户自助修改）
+    pub fn change_password(
+        &self,
+        old_password: String,
+        new_password: String,
+        updated_by: String,
+    ) -> Result<ActiveModel, Box<dyn std::error::Error>> {
+        // 验证旧密码
+        if !self.verify_password(&old_password) {
+            return Err("旧密码不正确".into());
+        }
+
+        // 验证新密码长度
+        if new_password.len() < 6 {
+            return Err("密码长度至少 6 位".into());
+        }
+
+        // 检查新旧密码是否相同
+        if old_password == new_password {
+            return Err("新密码不能与旧密码相同".into());
         }
 
         let password_hash = hash(new_password, DEFAULT_COST)?;
@@ -171,7 +196,6 @@ impl Model {
     }
 }
 
-// 手机号正则验证
 lazy_static::lazy_static! {
     static ref PHONE_REGEX: regex::Regex = regex::Regex::new(r"^1[3-9]\d{9}$").unwrap();
 }
